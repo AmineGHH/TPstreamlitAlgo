@@ -42,3 +42,4 @@ Follow these steps to run the project on your own computer 👇
 ```bash
 git clone https://github.com/<your-username>/TPstreamlitAlgo.git
 cd TPstreamlitAlgo
+"# TPstreamlitAlgo" 
