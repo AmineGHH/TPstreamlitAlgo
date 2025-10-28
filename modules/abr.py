@@ -3,14 +3,13 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 class Node:
-    def __init__(self, value):
+    def __init__(self, value): """constructeur"""
         self.value = value
-        self.left = None
+        self.left = None """none cuz mzl m3ndhch children"""
         self.right = None
         self.height = 1
 
 def insert(root, value):
-    """Insère une valeur dans l'arbre binaire de recherche."""
     if root is None:
         return Node(value)
     if value < root.value:
@@ -22,7 +21,6 @@ def insert(root, value):
     return root
 
 def find_min(node):
-    """Trouve le nœud ayant la plus petite valeur."""
     current = node
     while current.left is not None:
         current = current.left
@@ -56,7 +54,6 @@ def delete(root, value):
     return root
 
 def search(root, value):
-    """Recherche une valeur dans l'arbre."""
     if root is None or root.value == value:
         return root
     if value < root.value:
@@ -70,7 +67,7 @@ def get_height(node):
     return 1 + max(get_height(node.left), get_height(node.right))
 
 def get_size(node):
-    """Calcule la taille de l'arbre (nombre de nœuds)."""
+    """nombre de nœuds"""
     if node is None:
         return 0
     return 1 + get_size(node.left) + get_size(node.right)
