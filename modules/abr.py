@@ -3,11 +3,15 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 class Node:
-    def __init__(self, value): """constructeur"""
+    """Classe représentant un nœud dans un arbre binaire."""
+
+    def __init__(self, value):
+        """Constructeur du nœud."""
         self.value = value
-        self.left = None """none cuz mzl m3ndhch children"""
+        self.left = None  # none car pas encore d'enfants
         self.right = None
         self.height = 1
+
 
 def insert(root, value):
     if root is None:
