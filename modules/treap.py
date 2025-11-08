@@ -1,7 +1,6 @@
 import streamlit as st
 import random
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, FancyArrowPatch
 import pandas as pd
 from typing import Optional, List, Dict, Any, Set
 
@@ -21,7 +20,7 @@ class TreapNode:
 class Treap:
     def __init__(self, heap_type="max"):
         assert heap_type in ("max", "min")
-        self.root: Optional[TreapNode] = None
+        self.root: Optional["TreapNode"] = None
         self.heap_type = heap_type
 
     def _compare(self, a, b):
@@ -153,7 +152,7 @@ class Treap:
         return self.find(node.right, key)
 
 # ----------------------------
-# Visualization helpers
+# Visualization helpers - MINIMALISTIC SPLIT RECTANGLES
 # ----------------------------
 def compute_inorder_x(root: Optional[TreapNode]):
     x_index = {"i": 0}
@@ -168,7 +167,7 @@ def compute_inorder_x(root: Optional[TreapNode]):
     inorder(root)
     return pos_x
 
-def compute_positions(root: Optional[TreapNode], x_spacing=1.6, y_spacing=2.0):
+def compute_positions(root: Optional[TreapNode], x_spacing=2.5, y_spacing=3.0):
     positions = {}
     if root is None:
         return positions
@@ -190,46 +189,81 @@ def compute_positions(root: Optional[TreapNode], x_spacing=1.6, y_spacing=2.0):
             positions[n] = (x - mid, y)
     return positions
 
-def draw_treap(root: Optional[TreapNode], highlight_keys: Optional[Set[int]] = None, title="Treap", fig_width=7, fig_height=6):
+def draw_treap(root: Optional[TreapNode], highlight_keys: Optional[Set[int]] = None, 
+               title="Treap", fig_width=12, fig_height=8, heap_type="max"):
     highlight_keys = set(highlight_keys or [])
-    positions = compute_positions(root)
+    positions = compute_positions(root, x_spacing=3.0, y_spacing=3.5)
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    
+    # Clean background
     ax.set_facecolor("white")
+    fig.patch.set_facecolor("white")
 
     if not positions:
-        ax.text(0.5, 0.5, "Treap is empty", ha="center", va="center", fontsize=14)
+        ax.text(0.5, 0.5, "Treap is empty", ha="center", va="center", fontsize=16, color="#666666")
         ax.axis("off")
         return fig
 
+    # Draw connections
     for node, (x, y) in positions.items():
         if node.left and node.left in positions:
             x2, y2 = positions[node.left]
-            ax.add_patch(FancyArrowPatch((x, y - 0.45), (x2, y2 + 0.45),
-                                         arrowstyle='-|>', mutation_scale=10, lw=1.0, color='gray'))
+            ax.plot([x, x2], [y-0.8, y2+0.8], '#95a5a6', lw=2, alpha=0.6)
         if node.right and node.right in positions:
             x2, y2 = positions[node.right]
-            ax.add_patch(FancyArrowPatch((x, y - 0.45), (x2, y2 + 0.45),
-                                         arrowstyle='-|>', mutation_scale=10, lw=1.0, color='gray'))
+            ax.plot([x, x2], [y-0.8, y2+0.8], '#95a5a6', lw=2, alpha=0.6)
 
-    node_radius = 0.45
+    # Draw split rectangle nodes
+    node_width, node_height = 2.0, 1.2
     xs = [p[0] for p in positions.values()]
     ys = [p[1] for p in positions.values()]
 
     for node, (x, y) in positions.items():
         is_high = node.key in highlight_keys
-        face = "#FFD54F" if is_high else "#BDE6F2"
-        edge = "#FF8A65" if is_high else "black"
-        circ = Circle((x, y), node_radius, facecolor=face, edgecolor=edge, lw=1.6, zorder=3)
-        ax.add_patch(circ)
-        ax.text(x, y + 0.12, f"{node.key}", ha='center', va='center', fontsize=12, fontweight='bold', zorder=4)
-        ax.text(x, y - 0.12, f"(p={node.priority})", ha='center', va='center', fontsize=8, zorder=4)
+        
+        # Colors
+        key_color = "#FF6B6B"  # Red for key
+        priority_color = "#4ECDC4"  # Teal for priority
+        border_color = "#FFD93D" if is_high else "#2C3E50"
+        border_width = 3 if is_high else 1
+        
+        # Draw main rectangle
+        rect = plt.Rectangle((x - node_width/2, y - node_height/2), node_width, node_height,
+                           facecolor='white', edgecolor=border_color, 
+                           lw=border_width, zorder=3)
+        ax.add_patch(rect)
+        
+        # Draw key half (left)
+        key_rect = plt.Rectangle((x - node_width/2, y - node_height/2), 
+                                node_width/2, node_height,
+                                facecolor=key_color, edgecolor=border_color, 
+                                lw=1, zorder=4, alpha=0.9)
+        ax.add_patch(key_rect)
+        
+        # Draw priority half (right)
+        priority_rect = plt.Rectangle((x, y - node_height/2), 
+                                     node_width/2, node_height,
+                                     facecolor=priority_color, edgecolor=border_color, 
+                                     lw=1, zorder=4, alpha=0.9)
+        ax.add_patch(priority_rect)
+        
+        # Key text (left half) - large and centered
+        ax.text(x - node_width/4, y, f"{node.key}", ha='center', va='center', 
+                fontsize=14, fontweight='bold', zorder=5, color='white')
+        
+        # Priority text (right half) - large and centered
+        ax.text(x + node_width/4, y, f"{node.priority}", ha='center', va='center', 
+                fontsize=14, fontweight='bold', zorder=5, color='white')
 
+    # Clean styling
     ax.set_aspect('equal')
-    ax.set_title(title, fontsize=14, pad=10)
+    ax.set_title(title, fontsize=18, pad=20, fontweight='bold', color='#2C3E50')
     ax.axis('off')
+    
     if xs and ys:
-        ax.set_xlim(min(xs) - 1.5, max(xs) + 1.5)
-        ax.set_ylim(min(ys) - 1.5, max(ys) + 1.5)
+        ax.set_xlim(min(xs) - 2.5, max(xs) + 2.5)
+        ax.set_ylim(min(ys) - 2.0, max(ys) + 1.5)
+    
     return fig
 
 # ----------------------------
@@ -253,120 +287,145 @@ def collect_nodes(root: Optional[TreapNode]) -> List[Dict[str, Any]]:
 # Streamlit UI
 # ----------------------------
 def main():
-    st.set_page_config(page_title="Treap Visualizer", layout="wide")
-    st.title("🌳 Treap Visualizer (TP2)")
-
-    # heap type selector
-    st.subheader("⚙️ Treap Settings")
-    heap_type = st.radio("Heap Type", ["max", "min"], horizontal=True)
-
-    if "treap_type" not in st.session_state or st.session_state.treap_type != heap_type:
-        st.session_state.treap_type = heap_type
-        st.session_state.treap_obj = Treap(heap_type)
-        st.session_state.treap_logs = [f"Treap initialized as {heap_type}-heap."]
+    st.set_page_config(page_title="Treap Visualizer", layout="wide", page_icon="🌳")
+    
+    st.markdown("""
+    <style>
+    .main-header {
+        font-size: 2.8rem;
+        color: #2C3E50;
+        text-align: center;
+        margin-bottom: 1rem;
+        font-weight: 300;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<h1 class="main-header">🌳 Treap Visualizer</h1>', unsafe_allow_html=True)
+    
+    # Initialize session state
+    if "treap_obj" not in st.session_state:
+        st.session_state.treap_obj = Treap("max")
+        st.session_state.treap_logs = ["Treap initialized as max-heap."]
         st.session_state.treap_highlight = set()
 
-    treap: Treap = st.session_state.treap_obj
+    treap = st.session_state.treap_obj
 
-    left, right = st.columns([1.0, 1.6])
+    # Main layout
+    left, right = st.columns([1, 1.4])
 
     with left:
-        st.subheader("⚙️ Operations")
-        with st.expander("Insert single key", expanded=True):
-            colk, colp = st.columns([1, 1])
-            with colk:
-                ins_key = st.number_input("Key (int)", value=0, step=1, key="treap_ins_key")
-            with colp:
-                ins_priority = st.text_input("Priority (leave blank for random)", value="", key="treap_ins_pr")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("➕ Insert", use_container_width=True):
-                    try:
-                        p = None if ins_priority.strip() == "" else int(ins_priority)
-                        logs = treap.insert(int(ins_key), p)
-                        st.session_state.treap_logs.extend(logs)
-                        st.session_state.treap_highlight = {int(ins_key)}
-                    except Exception as e:
-                        st.error(f"Insert error: {e}")
-            with col2:
-                if st.button("🗑️ Delete", use_container_width=True):
-                    logs = treap.delete(int(ins_key))
-                    st.session_state.treap_logs.extend(logs)
-                    st.session_state.treap_highlight = set()
-
-        with st.expander("Insert bulk (comma or space separated)", expanded=False):
-            bulk_input = st.text_area("Enter keys (e.g. 10 5 20 or 10,5,20):", "10 5 15 3 7")
-            bulk_priority = st.text_input("Optional priority for all (blank = random):", value="", key="treap_bulk_pr")
-            if st.button("➕ Insert Bulk", use_container_width=True):
-                tokens = []
-                raw = bulk_input.replace(",", " ").split()
-                for t in raw:
-                    try:
-                        tokens.append(int(t))
-                    except:
-                        st.warning(f"Ignored token: {t}")
-                for k in tokens:
-                    p = None if bulk_priority.strip() == "" else int(bulk_priority)
-                    logs = treap.insert(int(k), p)
-                    st.session_state.treap_logs.extend(logs)
-                st.session_state.treap_highlight = set(tokens)
-
-        with st.expander("Search", expanded=False):
-            s_key = st.number_input("Search key", value=0, step=1, key="treap_search_key")
-            if st.button("🔍 Search", use_container_width=True):
-                found = treap.find(treap.root, int(s_key))
-                if found:
-                    st.session_state.treap_logs.append(f"🔎 Found {found.key}/{found.priority}")
-                    st.session_state.treap_highlight = {int(s_key)}
-                    st.success(f"Found: {found.key} (priority {found.priority})")
-                else:
-                    st.session_state.treap_logs.append(f"🔎 {s_key} not found")
-                    st.session_state.treap_highlight = set()
-                    st.warning(f"{s_key} not found.")
-
-        if st.button("🔁 Reset Treap", use_container_width=True):
+        st.subheader("⚙️ Configuration")
+        
+        # Heap type
+        heap_type = st.radio("Heap Type", ["max", "min"], horizontal=True, key="heap_type")
+        if st.session_state.treap_obj.heap_type != heap_type:
             st.session_state.treap_obj = Treap(heap_type)
-            st.session_state.treap_logs = [f"Treap reset ({heap_type}-heap)."]
+            st.session_state.treap_logs = [f"Treap initialized as {heap_type}-heap."]
             st.session_state.treap_highlight = set()
 
         st.markdown("---")
-        st.subheader("🔄 Traversals")
-        inord = treap.inorder(treap.root)
-        preord = treap.preorder(treap.root)
-        postord = treap.postorder(treap.root)
-        st.write("**In-order:**", inord)
-        st.write("**Pre-order:**", preord)
-        st.write("**Post-order:**", postord)
+        st.subheader("🔧 Operations")
+        
+        # Single operation
+        col1, col2 = st.columns(2)
+        with col1:
+            key = st.number_input("Key", value=0, step=1)
+        with col2:
+            priority = st.text_input("Priority", placeholder="Random if empty")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Insert", use_container_width=True, type="primary"):
+                try:
+                    p = None if not priority.strip() else int(priority)
+                    logs = treap.insert(key, p)
+                    st.session_state.treap_logs.extend(logs)
+                    st.session_state.treap_highlight = {key}
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error: {e}")
+        with col2:
+            if st.button("Delete", use_container_width=True):
+                logs = treap.delete(key)
+                st.session_state.treap_logs.extend(logs)
+                st.session_state.treap_highlight = set()
+                st.rerun()
+
+        # Bulk operations
+        with st.expander("Bulk Operations"):
+            bulk_keys = st.text_input("Keys (space or comma separated)", "10 5 15 3 7")
+            bulk_priority = st.text_input("Priority for all", placeholder="Random if empty")
+            if st.button("Insert All"):
+                keys = [int(k) for k in bulk_keys.replace(',', ' ').split() if k.strip()]
+                for k in keys:
+                    p = None if not bulk_priority.strip() else int(bulk_priority)
+                    treap.insert(k, p)
+                st.session_state.treap_highlight = set(keys)
+                st.rerun()
+
+        # Search
+        with st.expander("Search"):
+            search_key = st.number_input("Search key", value=0, step=1)
+            if st.button("Find"):
+                found = treap.find(treap.root, search_key)
+                if found:
+                    st.success(f"Found: {found.key} (Priority: {found.priority})")
+                    st.session_state.treap_highlight = {search_key}
+                else:
+                    st.warning("Not found")
+                    st.session_state.treap_highlight = set()
 
         st.markdown("---")
-        st.subheader("📜 Logs (recent)")
-        logs_to_show = st.session_state.treap_logs[-30:]
-        for ln in logs_to_show:
-            st.write(ln)
+        st.subheader("📊 Traversals")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("In-order", str(treap.inorder(treap.root))[1:-1])
+        with col2:
+            st.metric("Pre-order", str(treap.preorder(treap.root))[1:-1])
+        with col3:
+            st.metric("Post-order", str(treap.postorder(treap.root))[1:-1])
 
     with right:
-        st.subheader("🖼️ Treap Structure")
-        fig = draw_treap(treap.root, highlight_keys=st.session_state.treap_highlight,
-                         title=f"Treap ({heap_type}-heap: key / priority)")
+        st.subheader("🖼️ Visualization")
+        
+        # Visualization
+        fig = draw_treap(treap.root, 
+                        highlight_keys=st.session_state.treap_highlight,
+                        heap_type=heap_type)
         st.pyplot(fig)
 
-        st.markdown("---")
-        st.subheader("📊 Nodes Table")
-        rows = collect_nodes(treap.root)
-        if rows:
-            df = pd.DataFrame(rows)
-            df = df[["key", "priority", "left", "right"]]
-            st.dataframe(df, use_container_width=True)
-        else:
-            st.info("No nodes yet — insert some keys to populate the table.")
+        st.info("🔴 Key | 🔵 Priority | 🟡 Highlighted")
 
+        # Node table
+        st.markdown("---")
+        st.subheader("📋 Node Details")
+        nodes = collect_nodes(treap.root)
+        if nodes:
+            df = pd.DataFrame(nodes)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+        else:
+            st.info("No nodes in the treap")
+
+        # Controls
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Clear Highlight", use_container_width=True):
+                st.session_state.treap_highlight = set()
+                st.rerun()
+        with col2:
+            if st.button("Reset Treap", use_container_width=True):
+                st.session_state.treap_obj = Treap(heap_type)
+                st.session_state.treap_logs = [f"Treap reset ({heap_type}-heap)"]
+                st.session_state.treap_highlight = set()
+                st.rerun()
+
+    # Logs at bottom
     st.markdown("---")
-    colc1, colc2 = st.columns([1, 3])
-    with colc1:
-        if st.button("Clear Highlight"):
-            st.session_state.treap_highlight = set()
-    with colc2:
-        st.caption("Tip: use bulk insert to quickly create a treap. Priorities are random unless specified.")
+    with st.expander("Recent Logs"):
+        for log in st.session_state.treap_logs[-20:]:
+            st.text(log)
 
 if __name__ == "__main__":
     main()
