@@ -114,6 +114,95 @@ class Treap:
         logs.append("✅ Deletion complete.")
         return logs
 
+    # HEAP-LIKE OPERATIONS
+    def delete_root(self) -> List[str]:
+        """Delete the root node (like heap pop operation) - 'deletion de la racine'"""
+        logs = [f"🟥 DELETE ROOT (Heap-like operation)"]
+        if self.root is None:
+            logs.append("❌ Treap is empty - no root to delete")
+            return logs
+        
+        root_key = self.root.key
+        root_priority = self.root.priority
+        logs.append(f"🗑️ Deleting root node: {root_key}/{root_priority}")
+        self.root = self._delete_root_recursive(self.root, logs)
+        logs.append(f"✅ Root deletion complete. Removed key: {root_key}")
+        return logs
+
+    def _delete_root_recursive(self, node: TreapNode, logs: List[str]) -> Optional[TreapNode]:
+        """Recursively delete root using rotations (like heapify down)"""
+        if node.left is None and node.right is None:
+            logs.append("Root is now a leaf - removing it")
+            return None
+        
+        # Push root down using rotations (similar to heapify down)
+        if node.left is None:
+            logs.append(f"Rotate left: no left child, push root down right")
+            node = self.rotate_left(node)
+            node.left = self._delete_root_recursive(node.left, logs)
+        elif node.right is None:
+            logs.append(f"Rotate right: no right child, push root down left")
+            node = self.rotate_right(node)
+            node.right = self._delete_root_recursive(node.right, logs)
+        else:
+            # Both children exist - rotate towards higher priority child
+            if self._compare(node.left.priority, node.right.priority):
+                logs.append(f"Rotate right: left priority {node.left.priority} {'>' if self.heap_type=='max' else '<'} right {node.right.priority}")
+                node = self.rotate_right(node)
+                node.right = self._delete_root_recursive(node.right, logs)
+            else:
+                logs.append(f"Rotate left: right priority {node.right.priority} {'>' if self.heap_type=='max' else '<'} left {node.left.priority}")
+                node = self.rotate_left(node)
+                node.left = self._delete_root_recursive(node.left, logs)
+        return node
+
+    def get_root(self) -> Optional[Dict[str, int]]:
+        """Get root key and priority (like heap peek)"""
+        if self.root is None:
+            return None
+        return {"key": self.root.key, "priority": self.root.priority}
+
+    # ADDED: BST SORT METHOD
+    def bst_sort(self) -> List[tuple]:
+        """BST Sort - In-order traversal returns sorted keys with priorities"""
+        result = []
+        
+        def inorder(node):
+            if node:
+                inorder(node.left)
+                result.append((node.key, node.priority))
+                inorder(node.right)
+        
+        inorder(self.root)
+        return result
+
+    def heap_sort(self) -> List[tuple]:
+        """Heap Sort - Extract root repeatedly returns sorted by priority"""
+        sorted_list = []
+        temp_treap = self._copy()
+        
+        while temp_treap.root:
+            root_key = temp_treap.root.key
+            root_priority = temp_treap.root.priority
+            sorted_list.append((root_key, root_priority))
+            temp_treap.root = temp_treap._delete_root_recursive(temp_treap.root, [])
+        
+        return sorted_list
+
+    def _copy(self) -> "Treap":
+        """Create a copy of the treap for operations like heap_sort"""
+        new_treap = Treap(self.heap_type)
+        new_treap.root = self._copy_node(self.root)
+        return new_treap
+
+    def _copy_node(self, node: Optional[TreapNode]) -> Optional[TreapNode]:
+        if node is None:
+            return None
+        new_node = TreapNode(node.key, node.priority)
+        new_node.left = self._copy_node(node.left)
+        new_node.right = self._copy_node(node.right)
+        return new_node
+
     # traversals
     def inorder(self, node: Optional[TreapNode], res: Optional[List[int]] = None) -> List[int]:
         if res is None:
@@ -213,6 +302,10 @@ def draw_treap(root: Optional[TreapNode], highlight_keys: Optional[Set[int]] = N
             x2, y2 = positions[node.right]
             ax.plot([x, x2], [y-0.8, y2+0.8], '#95a5a6', lw=2, alpha=0.6)
 
+    # Highlight root with special color
+    root_node = root
+    root_pos = positions.get(root_node, None)
+
     # Draw split rectangle nodes
     node_width, node_height = 2.0, 1.2
     xs = [p[0] for p in positions.values()]
@@ -220,12 +313,18 @@ def draw_treap(root: Optional[TreapNode], highlight_keys: Optional[Set[int]] = N
 
     for node, (x, y) in positions.items():
         is_high = node.key in highlight_keys
+        is_root = node == root_node
         
-        # Colors
+        # Colors - special color for root
         key_color = "#FF6B6B"  # Red for key
         priority_color = "#4ECDC4"  # Teal for priority
-        border_color = "#FFD93D" if is_high else "#2C3E50"
-        border_width = 3 if is_high else 1
+        
+        if is_root:
+            border_color = "#9B59B6"  # Purple for root
+            border_width = 4
+        else:
+            border_color = "#FFD93D" if is_high else "#2C3E50"
+            border_width = 3 if is_high else 1
         
         # Draw main rectangle
         rect = plt.Rectangle((x - node_width/2, y - node_height/2), node_width, node_height,
@@ -254,6 +353,11 @@ def draw_treap(root: Optional[TreapNode], highlight_keys: Optional[Set[int]] = N
         # Priority text (right half) - large and centered
         ax.text(x + node_width/4, y, f"{node.priority}", ha='center', va='center', 
                 fontsize=14, fontweight='bold', zorder=5, color='white')
+
+        # Add root indicator
+        if is_root:
+            ax.text(x, y + node_height/2 + 0.3, "ROOT", ha='center', va='bottom',
+                   fontsize=10, fontweight='bold', color='#9B59B6')
 
     # Clean styling
     ax.set_aspect('equal')
@@ -298,6 +402,13 @@ def main():
         margin-bottom: 1rem;
         font-weight: 300;
     }
+    .sort-section {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #4ECDC4;
+        margin-bottom: 1rem;
+    }
     </style>
     """, unsafe_allow_html=True)
     
@@ -334,7 +445,7 @@ def main():
         with col2:
             priority = st.text_input("Priority", placeholder="Random if empty")
 
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Insert", use_container_width=True, type="primary"):
                 try:
@@ -348,6 +459,12 @@ def main():
         with col2:
             if st.button("Delete", use_container_width=True):
                 logs = treap.delete(key)
+                st.session_state.treap_logs.extend(logs)
+                st.session_state.treap_highlight = set()
+                st.rerun()
+        with col3:
+            if st.button("Delete Root", use_container_width=True, type="secondary"):
+                logs = treap.delete_root()
                 st.session_state.treap_logs.extend(logs)
                 st.session_state.treap_highlight = set()
                 st.rerun()
@@ -376,16 +493,50 @@ def main():
                     st.warning("Not found")
                     st.session_state.treap_highlight = set()
 
+        # Sorting Section - CLEARLY SEPARATED
         st.markdown("---")
-        st.subheader("📊 Traversals")
+        st.subheader("📊 Sorting Methods")
         
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("In-order", str(treap.inorder(treap.root))[1:-1])
-        with col2:
-            st.metric("Pre-order", str(treap.preorder(treap.root))[1:-1])
-        with col3:
-            st.metric("Post-order", str(treap.postorder(treap.root))[1:-1])
+        # BST Sort Section
+        with st.container():
+            st.markdown('<div class="sort-section">', unsafe_allow_html=True)
+            st.markdown("**🌳 BST Sort (Tri par BST)**")
+            st.markdown("*In-order traversal - sorted by keys*")
+            
+            if st.button("Show BST Sort", key="bst_sort"):
+                bst_sorted = treap.bst_sort()
+                if bst_sorted:
+                    st.success(f"BST Sorted (by keys):")
+                    st.write(bst_sorted)
+                else:
+                    st.warning("Treap is empty")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Heap Sort Section  
+        with st.container():
+            st.markdown('<div class="sort-section">', unsafe_allow_html=True)
+            st.markdown("**⚡ Heap Sort (Tri par Tas)**")
+            st.markdown("*Extract root repeatedly - sorted by priority*")
+            
+            if st.button("Show Heap Sort", key="heap_sort"):
+                heap_sorted = treap.heap_sort()
+                if heap_sorted:
+                    st.success(f"Heap Sorted (by priority):")
+                    st.write(heap_sorted)
+                else:
+                    st.warning("Treap is empty")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        # Root Info
+        st.markdown("---")
+        st.subheader("🎯 Root Information")
+        if st.button("Get Root"):
+            root = treap.get_root()
+            if root:
+                st.success(f"**Root Node:** Key={root['key']}, Priority={root['priority']}")
+                st.session_state.treap_highlight = {root['key']}
+            else:
+                st.warning("Treap is empty")
 
     with right:
         st.subheader("🖼️ Visualization")
@@ -396,7 +547,7 @@ def main():
                         heap_type=heap_type)
         st.pyplot(fig)
 
-        st.info("🔴 Key | 🔵 Priority | 🟡 Highlighted")
+        st.info("🔴 Key | 🔵 Priority | 🟡 Highlighted | 🟣 Root Node")
 
         # Node table
         st.markdown("---")
