@@ -703,104 +703,90 @@ with tab1:
 with tab2:
     st.header("Theoretical Complexity Analysis")
     
-    if test_type == "operations":
-        st.subheader("📋 Operations Complexity Comparison")
-        
-        complexity_data = [
-            {
-                "Data Structure": "Treap",
-                "Insert": "O(log n)",
-                "Search": "O(log n)",
-                "Delete": "O(log n)",
-                "Best Case": "O(log n)",
-                "Worst Case": "O(log n)",
-                "Average Case": "O(log n)",
-                "Notes": "Probabilistic balance, expected O(log n)"
-            },
-            {
-                "Data Structure": "AVL Tree",
-                "Insert": "O(log n)",
-                "Search": "O(log n)", 
-                "Delete": "O(log n)",
-                "Best Case": "O(log n)",
-                "Worst Case": "O(log n)",
-                "Average Case": "O(log n)",
-                "Notes": "Guaranteed balance, height ≤ 1.44log(n+2)"
-            },
-            {
-                "Data Structure": "BST Tree",
-                "Insert": "O(h)",
-                "Search": "O(h)", 
-                "Delete": "O(h)",
-                "Best Case": "O(log n)",
-                "Worst Case": "O(n)",
-                "Average Case": "O(log n)",
-                "Notes": "Height h depends on insertion order"
-            },
-            {
-                "Data Structure": "Max Heap",
-                "Insert": "O(log n)",
-                "Search": "O(n)",
-                "Delete": "O(n)",
-                "Best Case": "O(log n) / O(1)",
-                "Worst Case": "O(log n) / O(n)",
-                "Average Case": "O(log n) / O(n)",
-                "Notes": "Search/delete require linear scanning"
-            }
-        ]
-    else:
-        st.subheader("📋 Sorting Complexity Comparison")
-        
-        complexity_data = [
-            {
-                "Data Structure": "Treap (Heap Sort)",
-                "Time": "O(n log n)",
-                "Space": "O(n)",
-                "Best Case": "O(n log n)",
-                "Worst Case": "O(n log n)",
-                "Method": "Extract root repeatedly",
-                "Notes": "Consistent n log n performance"
-            },
-            {
-                "Data Structure": "Treap (BST Sort)", 
-                "Time": "O(n)",
-                "Space": "O(n)",
-                "Best Case": "O(n)",
-                "Worst Case": "O(n)",
-                "Method": "In-order traversal",
-                "Notes": "Fastest for BST structures"
-            },
-            {
-                "Data Structure": "AVL Tree",
-                "Time": "O(n)",
-                "Space": "O(n)",
-                "Best Case": "O(n)",
-                "Worst Case": "O(n)",
-                "Method": "In-order traversal", 
-                "Notes": "Guaranteed O(n) due to balance"
-            },
-            {
-                "Data Structure": "BST Tree",
-                "Time": "O(n)",
-                "Space": "O(n)", 
-                "Best Case": "O(n)",
-                "Worst Case": "O(n)",
-                "Method": "In-order traversal",
-                "Notes": "Time is O(n) but build time varies"
-            },
-            {
-                "Data Structure": "Max Heap",
-                "Time": "O(n log n)",
-                "Space": "O(n)",
-                "Best Case": "O(n log n)",
-                "Worst Case": "O(n log n)",
-                "Method": "Extract max repeatedly", 
-                "Notes": "Classic heap sort, consistent"
-            }
-        ]
+    # Reference table from the provided image with Tri column added
+    st.subheader("📚 Complexity Reference Table")
     
-    complexity_df = pd.DataFrame(complexity_data)
-    st.dataframe(complexity_df, use_container_width=True)
+    reference_data = [
+        {
+            "Data Structure": "BST",
+            "Search": "O(n)",
+            "Insert": "O(n)",
+            "Delete": "O(n)", 
+            "Tri (Sort)": "O(n) traversal + O(n²) build",
+            "Notes": "Linear in worst case (degenerate tree)"
+        },
+        {
+            "Data Structure": "AVL",
+            "Search": "O(log n)",
+            "Insert": "O(log n)",
+            "Delete": "O(log n)",
+            "Tri (Sort)": "O(n) traversal + O(n log n) build",
+            "Notes": "Guaranteed logarithmic performance"
+        },
+        {
+            "Data Structure": "Heap",
+            "Search": "O(n)",
+            "Insert": "O(log n)", 
+            "Delete": "O(n)",
+            "Tri (Sort)": "O(n log n) heap sort",
+            "Notes": "Efficient insert, but search/delete require scanning"
+        },
+        {
+            "Data Structure": "Treap",
+            "Search": "O(log n)",
+            "Insert": "O(log n)",
+            "Delete": "O(log n)",
+            "Tri (Sort)": "O(n) BST sort + O(n log n) build",
+            "Notes": "Probabilistic balance, expected O(log n)"
+        }
+    ]
+    
+    reference_df = pd.DataFrame(reference_data)
+    st.dataframe(reference_df, use_container_width=True)
+    
+    # Detailed explanation
+    st.subheader("🔍 Detailed Complexity Breakdown")
+    
+    if test_type == "operations":
+        st.markdown("""
+        ### **Operations Complexity:**
+        
+        **Search Operation:**
+        - **BST**: O(n) - linear search in worst case (degenerate tree)
+        - **AVL**: O(log n) - guaranteed logarithmic search
+        - **Heap**: O(n) - requires linear scanning of array
+        - **Treap**: O(log n) - probabilistic logarithmic search
+        
+        **Insert Operation:**
+        - **BST**: O(n) - may need to traverse entire tree in worst case
+        - **AVL**: O(log n) - efficient insertion with automatic balancing
+        - **Heap**: O(log n) - efficient heap insertion with bubble-up
+        - **Treap**: O(log n) - probabilistic balanced insertion
+        
+        **Delete Operation:**
+        - **BST**: O(n) - search + restructuring in worst case
+        - **AVL**: O(log n) - efficient deletion with rotations
+        - **Heap**: O(n) - search + O(log n) heapify = dominated by search
+        - **Treap**: O(log n) - probabilistic balanced deletion
+        """)
+    else:
+        st.markdown("""
+        ### **Sorting Complexities Explained:**
+        
+        **BST-based Sorts:**
+        - **BST**: O(n) traversal + O(n²) build worst case
+        - **AVL**: O(n) traversal + O(n log n) build (guaranteed)
+        - **Treap (BST Sort)**: O(n) traversal + O(n log n) build (expected)
+        
+        **Heap-based Sorts:**
+        - **Heap**: O(n log n) classic heap sort
+        - **Treap (Heap Sort)**: O(n log n) extraction by priority
+        
+        **Performance Characteristics:**
+        - **Fastest**: BST-based sorts when tree is balanced (O(n) after build)
+        - **Most Consistent**: Heap-based sorts (always O(n log n))
+        - **Best Overall**: AVL and Treap for guaranteed performance
+        """)
 
 with tab3:
     st.header("Performance Analysis")
@@ -809,36 +795,68 @@ with tab3:
     
     if test_type == "operations":
         st.markdown("""
-        **Expected Results by Data Structure:**
+        ### **Expected Performance Based on Theoretical Complexities:**
         
-        - **Treap**: Should show O(log n) performance for all operations regardless of data pattern
-        - **AVL Tree**: Guaranteed O(log n) performance, slightly more overhead than Treap due to rotations
-        - **BST Tree**: 
-          - **Balanced data**: O(log n) performance
-          - **Worst-case (sorted)**: O(n) performance (should show quadratic growth)
-          - **Best-case (balanced)**: O(log n) performance
-        - **Max Heap**: 
-          - Insert: O(log n)
-          - Search/Delete: O(n) (should show linear growth)
+        **Search Operation:**
+        - **Best**: AVL and Treap (O(log n) - logarithmic search)
+        - **Poor**: BST, Heap (O(n) - linear search)
         
-        **Key Insights:**
-        - AVL and Treap should maintain consistent logarithmic growth
-        - BST performance varies dramatically with input pattern
-        - Heap search/delete shows linear complexity
+        **Insert Operation:**
+        - **Best**: AVL, Treap, and Heap (O(log n) - efficient insertion)
+        - **Poor**: BST (O(n) in worst case)
+        
+        **Delete Operation:**
+        - **Best**: AVL and Treap (O(log n) - efficient deletion with balancing)
+        - **Poor**: BST and Heap (O(n) - requires search + adjustment)
+        
+        ### **Key Insights:**
+        - **AVL Tree** provides guaranteed O(log n) performance for all operations
+        - **Treap** offers similar guarantees with probabilistic balancing
+        - **BST** can degrade to O(n) performance with unbalanced data
+        - **Heap** excels at insertion but struggles with search/delete
         """)
     else:
         st.markdown("""
-        **Expected Results by Sorting Method:**
+        ### **Expected Sorting Performance:**
         
-        - **BST-based sorts (Treap BST, AVL, BST)**: O(n) for traversal after O(n log n) build
-        - **Heap-based sorts (Treap Heap, Max Heap)**: O(n log n) for extraction
-        - **Best overall**: BST-based sorts should be faster for large n
-        - **Most consistent**: Heap sorts have predictable n log n behavior
+        **Fastest Sorts:**
+        - **Treap (BST Sort)**: O(n) after O(n log n) build
+        - **AVL Tree**: O(n) after O(n log n) build  
+        - **BST Tree**: O(n) but build time varies significantly
         
-        **Key Insights:**
-        - BST sorts are faster but depend on tree balance
-        - Heap sorts are slower but more predictable
-        - AVL and Treap provide consistent performance across data patterns
+        **Consistent but Slower:**
+        - **Treap (Heap Sort)**: O(n log n) consistently
+        - **Max Heap**: O(n log n) - classic heap sort
+        
+        ### **Key Insights:**
+        - For **frequent sorting operations**: BST-based sorts are superior
+        - For **priority queue operations**: Heap-based structures are better
+        - **AVL/Treap** provide the best balance of performance guarantees
+        - **Plain BST** is risky due to potential O(n²) build time
+        """)
+    
+    st.subheader("🎯 Practical Recommendations")
+    
+    if test_type == "operations":
+        st.markdown("""
+        **Choose based on your primary operation:**
+        
+        - **For search-intensive applications**: AVL Tree or Treap
+        - **For insert-intensive applications**: AVL Tree, Treap, or Heap
+        - **For balanced operations**: AVL Tree or Treap
+        - **Avoid BST** for critical applications with unpredictable data
+        
+        **Best Overall**: AVL Tree (guaranteed performance) or Treap (near-guaranteed with simpler implementation)
+        """)
+    else:
+        st.markdown("""
+        **Choose based on your sorting needs:**
+        
+        - **For frequent sorting**: Treap (BST Sort) or AVL Tree
+        - **For priority operations**: Heap-based structures  
+        - **For predictable performance**: AVL Tree or Heap Sort
+        
+        **Best Overall**: Treap offers excellent flexibility with both BST and Heap sort options
         """)
 
 with tab4:
@@ -849,25 +867,23 @@ with tab4:
     
     **Three Data Patterns:**
     1. **Balanced Random Data** (Seed: 12345)
-       - Mix of random and prime-based sequences
-       - Creates reasonably balanced trees for BST
        - Realistic simulation of average-case scenarios
+       - Shows expected performance in practical applications
     
     2. **Worst-case BST Data** (Sorted sequence)
-       - Creates degenerate BST with height n
-       - Shows O(n) performance for BST operations
+       - Demonstrates O(n) performance degradation in BST
        - Highlights importance of balancing
     
     3. **Best-case BST Data** (Perfectly balanced)
-       - Creates optimally balanced BST
-       - Shows O(log n) performance for BST
-       - Demonstrates BST's potential with good data
+       - Shows optimal BST performance
+       - Demonstrates potential with good data distribution
     
-    **Key Features:**
-    - **Multiple data patterns** for comprehensive analysis
-    - **Fixed seeds** for reproducible results  
-    - **Average of 3 runs** for stable measurements
-    - **Consistent operation counts** for fair comparison
+    **Theoretical Foundation:**
+    Based on established complexity analysis:
+    - **AVL**: Guaranteed O(log n) for search, insert, delete
+    - **BST**: O(n) in worst case, O(log n) in best case  
+    - **Heap**: O(log n) insert, O(n) search/delete
+    - **Treap**: Expected O(log n) for all operations
     
     **Data Structures Compared:**
     - **Treap**: BST + Heap hybrid with probabilistic balance
