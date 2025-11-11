@@ -48,11 +48,9 @@ class Treap:
             node = TreapNode(key, priority)
             logs.append(f"✅ Created node {node.key}/{node.priority}.")
             return node
-
         if key == node.key:
             logs.append(f"⚠️ Key {key} already exists ({node.key}/{node.priority}). Skipped.")
             return node
-
         if key < node.key:
             logs.append(f"{key}/{priority} vs {node.key}/{node.priority}: go left.")
             node.left = self._insert(node.left, key, priority, logs)
@@ -162,32 +160,55 @@ class Treap:
             return None
         return {"key": self.root.key, "priority": self.root.priority}
 
-    # ADDED: BST SORT METHOD
+    # OPTIMIZED: BST SORT METHOD - O(n) time, O(h) space
     def bst_sort(self) -> List[tuple]:
-        """BST Sort - In-order traversal returns sorted keys with priorities"""
+        """BST Sort - Iterative in-order traversal returns sorted keys with priorities"""
         result = []
+        stack = []
+        current = self.root
         
-        def inorder(node):
-            if node:
-                inorder(node.left)
-                result.append((node.key, node.priority))
-                inorder(node.right)
+        while current or stack:
+            # Go to leftmost node
+            while current:
+                stack.append(current)
+                current = current.left
+            
+            # Process node
+            current = stack.pop()
+            result.append((current.key, current.priority))
+            
+            # Move to right subtree
+            current = current.right
         
-        inorder(self.root)
         return result
 
+    # OPTIMIZED: HEAP SORT METHOD - O(n log n) time, O(n) space
     def heap_sort(self) -> List[tuple]:
-        """Heap Sort - Extract root repeatedly returns sorted by priority"""
-        sorted_list = []
-        temp_treap = self._copy()
+        """Heap Sort - Extract all nodes by priority using iterative DFS"""
+        if self.root is None:
+            return []
         
-        while temp_treap.root:
-            root_key = temp_treap.root.key
-            root_priority = temp_treap.root.priority
-            sorted_list.append((root_key, root_priority))
-            temp_treap.root = temp_treap._delete_root_recursive(temp_treap.root, [])
+        # Collect all nodes using stack (no recursion limits)
+        nodes = []
+        stack = [self.root]
         
-        return sorted_list
+        while stack:
+            node = stack.pop()
+            nodes.append((node.key, node.priority))
+            
+            # Add children to stack (right first, then left for DFS order)
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+        
+        # Sort by priority
+        if self.heap_type == "max":
+            nodes.sort(key=lambda x: x[1], reverse=True)  # Sort by priority descending
+        else:
+            nodes.sort(key=lambda x: x[1])  # Sort by priority ascending
+        
+        return nodes
 
     def _copy(self) -> "Treap":
         """Create a copy of the treap for operations like heap_sort"""

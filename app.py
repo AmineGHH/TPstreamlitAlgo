@@ -14,7 +14,7 @@ st.write("Welcome! Select a TP to explore different data structures and algorith
 tp_descriptions = {
     "TP1": "Covers basic binary search trees (ABR), AVL trees, heaps, and graph fundamentals.",
     "TP2": "Focuses on advanced trees like Treap — combining BST and heap properties.",
-    "TP3": "coming soon",
+        "TP3": "Advanced algorithm analysis with complexity measurement and performance testing.",
     "TP4": "coming soon",
     "TP5": "coming soon",
     "TP6": "coming soon",
