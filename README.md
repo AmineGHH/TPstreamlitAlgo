@@ -4,6 +4,7 @@ Ce site permet de visualiser plusieurs structures de données et d’en étudier
 Il offre également la possibilité d’analyser la complexité de différents algorithmes de tri, ainsi que de comprendre et d’exécuter deux algorithmes supplémentaires : Johnson et Welsh-Powell, utilisés notamment en théorie des graphes pour la coloration et l’ordonnancement.
 
 ***Les membres du groupe 5:***
+
 Ghorab Mohammed Amine
 
 Boumaza Aya
