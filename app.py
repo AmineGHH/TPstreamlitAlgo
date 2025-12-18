@@ -10,14 +10,22 @@ st.set_page_config(
 st.title("🧩 Algorithm Visualizer Dashboard")
 st.write("Welcome! Select a TP to explore different data structures and algorithms.")
 
-# Description text for each TP
+# Updated TP descriptions
 tp_descriptions = {
     "TP1": "Covers basic binary search trees (ABR), AVL trees, heaps, and graph fundamentals.",
     "TP2": "Focuses on advanced trees like Treap — combining BST and heap properties.",
-        "TP3": "Advanced algorithm analysis with complexity measurement and performance testing.",
-    "TP4": "coming soon",
-    "TP5": "coming soon",
-    "TP6": "coming soon",
+    "TP3": "Advanced algorithm analysis with complexity measurement and performance testing.",
+    "TP4 – Johnson Algorithm": "Shortest paths in weighted graphs using Johnson’s algorithm.",
+    "TP4 – Welsh-Powell Algorithm": "Graph coloring using the Welsh–Powell heuristic.",
+}
+
+# Mapping TP names to actual page files
+tp_pages = {
+    "TP1": "pages/TP1.py",
+    "TP2": "pages/TP2.py",
+    "TP3": "pages/TP3.py",
+    "TP4 – Johnson Algorithm": "pages/TP4johnson_ui.py",
+    "TP4 – Welsh-Powell Algorithm": "pages/TP4welsh_powell_ui.py",
 }
 
 cols = st.columns(3)
@@ -29,4 +37,4 @@ for i, tp_name in enumerate(tp_names):
         st.markdown(f"### {tp_name}")
         st.write(tp_descriptions[tp_name])
         if st.button(f"Open {tp_name}", key=f"btn_{tp_name}"):
-            st.switch_page(f"pages/{tp_name}.py")
+            st.switch_page(tp_pages[tp_name])
