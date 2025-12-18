@@ -142,8 +142,8 @@ tp_pages = {
     "TP1 — Fundamental Structures": "pages/TP1.py",
     "TP2 — Treap": "pages/TP2.py",
     "TP3 — Complexity Analysis": "pages/TP3.py",
-    "TP4 — Johnson Algorithm": "pages/TP4johnson_ui.py",
-    "TP4 — Welsh–Powell Algorithm": "pages/TP4welsh_powell_ui.py",
+    "TP4 — Johnson Algorithm": "pages/TP4johnson.py",
+    "TP4 — Welsh–Powell Algorithm": "pages/TP4welsh_powell.py",
 }
 
 # =========================
