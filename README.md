@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/a404f975-3841-4383-a2e7-2e28455a9d74
+
 ***TP Streamlit Algo — Visualisation des Arbres AVL, ABR et Tas***
 
 Ce site permet de visualiser plusieurs structures de données et d’en étudier le fonctionnement en détail.
@@ -29,6 +33,10 @@ main file path : app.py
 <img width="1312" height="643" alt="Opera Snapshot_2025-12-18_155332_share streamlit io" src="https://github.com/user-attachments/assets/3b37340b-988d-49bf-914b-9554c9526ba9" />
 
 ***En cas de problème, vous pouvez accepter l’invitation que nous avons envoyée à votre Gmail. Nous vous avons partagé une invitation Streamlit pour accéder à notre projet.***
+
+
+
+https://github.com/user-attachments/assets/da1c5ff3-0cb7-48ec-a3c8-5eb127380269
 
 
 
